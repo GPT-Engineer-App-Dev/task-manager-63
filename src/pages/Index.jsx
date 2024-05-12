@@ -1,17 +1,62 @@
-// Update this page (the content is just a fallback if you fail and example)
-// Use chakra-ui
-import { Container, Text, VStack } from "@chakra-ui/react";
-
-// Example of using react-icons
-// import { FaRocket } from "react-icons/fa";
-// <IconButton aria-label="Add" icon={<FaRocket />} size="lg" />; // IconButton would also have to be imported from chakra
+import { useState } from 'react';
+import { Container, VStack, Heading, Input, Button, List, ListItem, IconButton, useToast } from '@chakra-ui/react';
+import { FaTrash, FaEdit } from 'react-icons/fa';
 
 const Index = () => {
+  const [tasks, setTasks] = useState([]);
+  const [input, setInput] = useState('');
+  const toast = useToast();
+
+  const addTask = () => {
+    if (input === '') {
+      toast({
+        title: 'No task entered',
+        description: "Please enter a task before adding.",
+        status: 'error',
+        duration: 2000,
+        isClosable: true,
+      });
+      return;
+    }
+    setTasks([...tasks, { id: Date.now(), text: input }]);
+    setInput('');
+  };
+
+  const deleteTask = (id) => {
+    setTasks(tasks.filter(task => task.id !== id));
+  };
+
+  const editTask = (id, newText) => {
+    const updatedTasks = tasks.map(task => {
+      if (task.id === id) {
+        return { ...task, text: newText };
+      }
+      return task;
+    });
+    setTasks(updatedTasks);
+  };
+
   return (
-    <Container centerContent maxW="container.md" height="100vh" display="flex" flexDirection="column" justifyContent="center" alignItems="center">
+    <Container maxW="container.md" py={8}>
       <VStack spacing={4}>
-        <Text fontSize="2xl">Your Blank Canvas</Text>
-        <Text>Chat with the agent to start making edits.</Text>
+        <Heading mb={6}>Todo App</Heading>
+        <Input
+          placeholder="Add a new task..."
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          size="lg"
+        />
+        <Button onClick={addTask} colorScheme="blue" px={8}>
+          Add Task
+        </Button>
+        <List spacing={3} w="full">
+          {tasks.map(task => (
+            <ListItem key={task.id} d="flex" justifyContent="space-between" alignItems="center" p={2} boxShadow="md">
+              <Input type="text" defaultValue={task.text} onBlur={(e) => editTask(task.id, e.target.value)} />
+              <IconButton aria-label="Delete Task" icon={<FaTrash />} onClick={() => deleteTask(task.id)} />
+            </ListItem>
+          ))}
+        </List>
       </VStack>
     </Container>
   );
